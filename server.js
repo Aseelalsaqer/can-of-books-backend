@@ -4,6 +4,7 @@ const cors = require ('cors');
 require ('dotenv').config();
 const server = express();
 server.use(cors());
+server.use(express.json());
 const PORT = process.env.PORT;
 
 
@@ -35,7 +36,7 @@ async function seedData()
     description:'Winner of the Pulitzer Prize* A New York Times Book Review Top Ten Book* A National Book Award finalist',
     status:'In stock soon',
     email:'aseel_fawwaz@yahoo.com',
-    url:'https://images-na.ssl-images-amazon.com/images/I/51uG-IHat3L._SY291_BO1,204,203,200_QL40_FMwebp_.jpg'
+    // url:'https://images-na.ssl-images-amazon.com/images/I/51uG-IHat3L._SY291_BO1,204,203,200_QL40_FMwebp_.jpg'
     })
 
     const book2= new Book({
@@ -43,7 +44,7 @@ async function seedData()
     description:'Politics and the novel, Ghassan Kanafani once said, are an indivisible case. Fadl al-Naqib has reflected that Kanafani wrote the Palestinian story, then he was written by it. His narratives offer entry into the Palestinian experience of the conflict that has anguished the people of the Middle East for more than a century.',
     status:'In stock soon',
     email:'aseel_fawwaz@yahoo.com',
-    url:'https://images-na.ssl-images-amazon.com/images/I/51KN2XAA78L._SX315_BO1,204,203,200_.jpg'
+    // url:'https://images-na.ssl-images-amazon.com/images/I/51KN2XAA78L._SX315_BO1,204,203,200_.jpg'
     })
 
     const book3= new Book({
@@ -51,7 +52,7 @@ async function seedData()
     description:'J.R.R. Tolkien’s grand masterwork in a new hardcover illustrated with the art created by Tolkien himself as he envisioned Middle-earth , One Ring to rule them all, One Ring to find them, One Ring to bring them all and in the darkness bind them.',
     status:'In stock soon',
     email:'aseel_fawwaz@yahoo.com',
-    url:'https://images-na.ssl-images-amazon.com/images/I/41vN31PD7SL._SY291_BO1,204,203,200_QL40_FMwebp_.jpg'
+    // url:'https://images-na.ssl-images-amazon.com/images/I/41vN31PD7SL._SY291_BO1,204,203,200_QL40_FMwebp_.jpg'
     })
 
     await book1.save();
@@ -60,6 +61,8 @@ async function seedData()
 }
 server.get('/', homeHandler);
 server.get('/mybooks',getBooks);
+server.post('/addBook',addBook);
+server.delete('/deletebook/:id',deleteBook);
 
 function homeHandler(req,res){
 
@@ -79,6 +82,45 @@ function getBooks(req,res){
     })
 }
 
+async function addBook(req,res){
+    // console.log(req.body);
+    const {bookName, description, status,email} = req.body;
+    await Book.create({ 
+        bookName: bookName,
+        description: description,
+        status: status,
+        myEmail: email,
+    });
+    
+    Book.find({myEmail:email},(err,result)=>{
+        if(err)
+        {
+            console.log(err);
+        }
+        else
+        {
+            res.send(result);
+        }
+    })
+}
+ function deleteBook(req,res){
+    const bookId = req.params.id;
+    const email = req.query.email;
+    Book.deleteOne({_id:bookId},(err,result)=>{
+        
+        Book.find({myEmail:email},(err,result)=>{
+            if(err)
+            {
+                console.log(err);
+            }
+            else
+            {
+                res.send(result);
+            }
+        })
+
+    })
+}
 
 
 
