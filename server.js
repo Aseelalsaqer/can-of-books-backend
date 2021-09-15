@@ -61,6 +61,7 @@ server.get('/', homeHandler);
 server.get('/mybooks',getBooks);
 server.post('/addBook',addBook);
 server.delete('/deletebook/:id',deleteBook);
+server.put('/updateBook/:id',updateBookHandler);
 
 function homeHandler(req,res){
 
@@ -81,9 +82,9 @@ function getBooks(req,res){
 
 async function addBook(req,res){
     // console.log(req.body);
-    const {bookName, description, status,email} = req.body;
+    const {title, description, status,email} = req.body;
     await Book.create({ 
-        bookName: bookName,
+        title: title,
         description: description,
         status: status,
         myEmail: email,
@@ -119,6 +120,23 @@ async function addBook(req,res){
     })
 }
 
+function updateBookHandler(req,res) {
+    const id = req.params.id;
+    const {title, description, status,email} = req.body;
+    
+    book.findByIdAndUpdate(id,{title, description, status},(err,result)=>{
+        Book.find({ownerEmail:email},(err,result)=>{
+            if(err)
+            {
+                console.log(err);
+            }
+            else
+            {
+                res.send(result);
+            }
+        })
+    })
+}
 
 
 server.listen(PORT, () => {
